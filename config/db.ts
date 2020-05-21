@@ -1,3 +1,6 @@
+//SPDX-License-Identifier: MIT
+//(c)2020 EM~ eetu@kkona.xyz
+
 import { init, MongoClient } from "https://deno.land/x/mongo@v0.6.0/mod.ts";
 await init();
 class Database {

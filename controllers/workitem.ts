@@ -1,3 +1,6 @@
+//SPDX-License-Identifier: MIT
+//(c)2020 EM~ eetu@kkona.xyz
+
 import { HandlerFunc, Context } from "https://deno.land/x/abc@v1.0.0-rc2/mod.ts";
 import { env, VERSION } from "../server.ts";
 import db from "../config/db.ts";

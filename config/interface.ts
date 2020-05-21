@@ -1,3 +1,6 @@
+//SPDX-License-Identifier: MIT
+//(c)2020 EM~ eetu@kkona.xyz
+
 import { DateTimeFormat } from "https://deno.land/std/datetime/mod.ts";
 interface Iworkitem {
     _id: { $oid: string },
