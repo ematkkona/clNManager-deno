@@ -18,4 +18,13 @@ interface Ivalidate {
     expectedRound: string,
     acceptTime: string
 };
-export { Iworkitem, Ivalidate };
+interface User {
+    id: number,              // since it's an array
+    uid: string,             // user id
+    OwnedLabel: string,      // wuid for worker ids, nuid for node ids
+    OwnedKey: string         // wuid / nuid
+}
+
+interface User extends Array<User>{} 
+
+export { Iworkitem, Ivalidate, User };

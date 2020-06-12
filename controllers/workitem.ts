@@ -10,28 +10,23 @@ const workitems = database.collection("workitems");
 const ident = database.collection("ident");
 const validateData: Ivalidate = JSON.parse(Deno.readTextFileSync('./config/validate.json'));
 const benchmarkData: Ivalidate = JSON.parse(Deno.readTextFileSync('./config/benchmark.json'));
-export { rootMsg, wPostNew, getStats, workRequest, workGetSingle, workUpdItem, removeItem };
-const rootMsg: HandlerFunc = async (c: Context) => {
-    try {
-        const allItems: Iworkitem[] = await workitems.find();
-        //const response = `clN22 workitem-manager v${VERSION} (deno)`;
-        return c.json(allItems, 200);
-    } catch (error) {
-        return c.json(error, 500);
-    }
-}
+export { wPostNew, workRequest, workAssign, workUpdItem, removeItem };
+
 const workRequest: HandlerFunc = async (c: Context) => {
-    // /wreq (require uid & deviceid)
-    // match worker-id with assigned node(s), verify validity, see if benchmarked with current sets (force new benchmarking-session if not)
-    // return the oldest, non-expired workitem (with ownership) available / if worker != "admin", return 'admin'-workitem every now and then (1/4 ? 1/8 ?)
-    // return id, workitem & result (reserved etc)
     try {
-        return c.json('meh',200);
+        const body = await (c.body());
+        if (!Object.keys(body).length) {
+            return c.string("workRequest: Empty!", 400);
+        }
+        const { uid } = c.params as { uid: string };
+        const { id } = c.params as { id: string };
+        const fetchItem = await fetchWorkItem(uid, id);
+        return c.json(fetchItem,200);
     } catch (error) {
         return c.json(error,500);
     }
 }
-const workGetSingle: HandlerFunc = async (c: Context) => {
+const workAssign: HandlerFunc = async (c: Context) => {
     try {
         const body = await (c.body());
         if (!Object.keys(body).length) {
@@ -59,7 +54,12 @@ const removeItem: HandlerFunc = async (c: Context) => {
     try {
         const { id } = c.params as { id: string };
         const fetchItem = await workitems.findOne({ _id: { "$oid":id } });
-        return c.json('meh',200);
+        if (fetchItem != "waiting" || fetchItem != "working") {
+            workitems.deleteOne({_id: { "$oid":id } });
+            return c.json('removeItem: Done',200);
+        } else {
+            return c.json('removeItem: Nope',400);
+        }
     } catch (error) {
         return c.json(error,500);
     }
@@ -81,28 +81,21 @@ const wPostNew: HandlerFunc = async (c: Context) => {
         return c.json(error, 500);
     }
 }
-const getStats: HandlerFunc = async (c: Context) => {
-    try {
-        let totalItems = await getCount('totalItems');
-        let waiting = await getCount('waiting');
-        let working = await getCount('working');
-        let expired = await getCount('expired');
-        let retVal = { totalItems, waiting, working, expired };
-        return c.json(retVal, 200);
-    } catch (error) {
-        return c.json(error, 500);
+
+function fetchWorkItem(uid: string, id: string) {
+    //todo
+        if (checkOwnerShip(uid, id)) {
+            return `Here you go...`;
+        } else {
+            return `No deal...`;
     }
-};
-async function getCount (resToFind: string) {
-    var tmpCounter = 0;
-    if (resToFind != 'totalItems') {
-        for (const workitem of await workitems.find({'result': resToFind})) {
-            tmpCounter++;
-        }
+}
+    
+function checkOwnerShip(uid: string, id: string) {
+    //todo
+    if (uid && id) {
+        return true;
     } else {
-        for (const workitem of await workitems.find()) {
-            tmpCounter++;
-        }
+        return false;
     }
-        return tmpCounter;
 }
